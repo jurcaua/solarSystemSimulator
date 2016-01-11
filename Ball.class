@@ -2,22 +2,22 @@
 import java.awt.*;
 import hsa.Console;
 
-public class Ball //I am creating an object called Ball
+public class Ball
 {
     //All the characteristics of the object Ball
     
-    protected int x, y, radius; //protected means only approved methods can alter the value of these following variables
+    protected int x, y, radius;
     protected Color clr, background;
     protected Console c;
     
-    public Ball() // Constructor method is used to create (memory) and where values are being initialized
+    public Ball()
     {
         x = 320;
         y = 240;
         radius = 50;
         clr = Color.black;
         background = Color.white;
-    } // A Constructor method is vital for any object
+    } 
     
     public Ball(int x1, int y1, int rad1, Color clr1, Color bclr1)
     {
@@ -26,25 +26,18 @@ public class Ball //I am creating an object called Ball
         radius = rad1;
         clr = clr1;
         background = bclr1;
-    }// Another Constructor method - Method overloading
+    }
     
-    /*
-    Method overloading: Two or three methods that have the same name, but differ
-    by either, the parameters that are being passed
-    
-    */
-    //Behaviours
-    
-    public void SetX(int x1)// Sets the characteristics
+    public void SetX(int x1)
     {
         x = x1;
     }
     
     
-     public int GetX()// Returns the characteristic value of x
+     public int GetX()
     {
         return x;
-    }// Returns a characteristic value of x - It is a function method that returns a value
+    }
     
     
     public void SetY(int y1)
