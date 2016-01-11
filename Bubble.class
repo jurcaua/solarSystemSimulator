@@ -4,13 +4,13 @@ import hsa.Console;
 
 public class Bubble extends Ball
 {
-    protected int iHorizontal, iVertical; //add other fields (characteristics)
+    protected int iHorizontal, iVertical;
 
     protected Console c;
 
     public Bubble ()  //Constructor method
     {
-        super (); //First call the constructor of the base class
+        super ();
         iHorizontal = 1;
         iVertical = (int) (Math.random () * 2) - 1;
 
@@ -19,7 +19,7 @@ public class Bubble extends Ball
 
     public Bubble (int ix, int iy, int radius, Color clr1, Color bclr1, int iHor, int iVert)
     {
-        super (ix, iy, radius, clr1, bclr1); //call the constructor method first
+        super (ix, iy, radius, clr1, bclr1);
         iHorizontal = iHor;
         iVertical = iVert;
 
@@ -28,32 +28,32 @@ public class Bubble extends Ball
 
     public Bubble (int ix, int iy, int radius, Color clr1, Color bclr1)
     {
-        super (ix, iy, radius, clr1, bclr1); //call the constructor method first
+        super (ix, iy, radius, clr1, bclr1);
         iHorizontal = (int) (Math.random () * 2) - 1;
         iVertical = (int) (Math.random () * 2) - 1;
 
     }
 
 
-    public void SetHorizontal (int iH)  // Sets the characteristics
+    public void SetHorizontal (int iH) 
     {
         iHorizontal = iH;
     }
 
 
-    public int GetHorizontal ()  // Returns the characteristic
+    public int GetHorizontal () 
     {
         return iHorizontal;
     }
 
 
-    public void SetVertical (int iV)  // Sets the characteristics
+    public void SetVertical (int iV)
     {
         iVertical = iV;
     }
 
 
-    public int GetVertical ()  // Returns the characteristic
+    public int GetVertical ()
     {
         return iVertical;
     }
