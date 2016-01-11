@@ -1,0 +1,602 @@
+// Name: Alexander Jurcau
+// Date: June 3rd 2014
+// Description: A solar system simulating program.
+
+import java.awt.*;
+import hsa.Console;
+import java.io.*;
+
+public class Solar_Main
+{
+    static Console c;
+
+    static int consoleSize = 25;
+    static double scaleFactor = 1;
+
+    static int nPlanets;
+    static int nStars = 100;
+    static int starX[] = new int [nStars];
+    static int starY[] = new int [nStars];
+    static int starL[] = new int [nStars];
+    static int blackStar;
+    static int iStar = 0;
+
+    static int maxPlanets = 100;
+    static int maxMoons = 100;
+
+    static int sunR = (int) (20 * scaleFactor);
+    static int maxPlanetR = (int) (12 * scaleFactor);
+    static int maxMoonR = (int) (4 * scaleFactor);
+    static int planetStartD = (int) (80 * scaleFactor);
+    static int planetD = (int) (100 * scaleFactor);
+    static int moonD = (int) (28 * scaleFactor);
+
+    static boolean shipMode;
+    static int shipStartX = 100;
+    static int shipStartY = 200;
+    static int shipR = (int) (2 * scaleFactor);
+    static Color shipC = Color.red;
+    static Color shipBackC = Color.black;
+
+    static Color backgroundC = Color.black;
+
+    static double speedUp = 1;
+    static double speedUpShow = speedUp;
+
+    public static void main (String[] args) throws IOException
+    {
+        int choice, distance, centerX = 320, centerY = 250, x, y, r, R, G, B;
+        double angle;
+        char key;
+        boolean rotating = true;
+        Color colour;
+
+        Font speedFont = new Font ("Arial", Font.PLAIN, 20);
+
+        int nMoons[] = new int [maxPlanets];
+
+        int angleIncPlanet[] = new int [maxPlanets];
+        int angleIncMoon[] [] = new int [maxPlanets] [maxMoons];
+
+        Ball planet[] = new Ball [maxPlanets];
+        Polar polarPlanet[] = new Polar [maxPlanets];
+
+        Ball moon[] [] = new Ball [maxPlanets] [maxMoons];
+        Polar polarMoon[] [] = new Polar [maxPlanets] [maxMoons];
+
+        Bubble ship = new Bubble (shipStartX, shipStartY, shipR, shipC, shipBackC, 0, 0);
+
+        if (consoleSize == 0)
+        {
+            c = new Console ();
+        }
+        else
+        {
+            c = new Console (consoleSize);
+        }
+
+        if (consoleSize == 0)
+        {
+            centerX = 320;
+            centerY = 250;
+        }
+        else if (consoleSize == 10)
+        {
+            centerX = 245;
+            centerY = 180;
+        }
+        else if (consoleSize == 15)
+        {
+            centerX = 375;
+            centerY = 250;
+        }
+        else if (consoleSize == 20)
+        {
+            centerX = 480;
+            centerY = 320;
+        }
+        else if (consoleSize == 25)
+        {
+            centerX = 600;
+            centerY = 400;
+        }
+        else if (consoleSize == 30)
+        {
+            centerX = 720;
+            centerY = 490;
+        }
+
+        Ball sun = new Ball (centerX, centerY, sunR, Color.yellow, backgroundC);
+
+        c.println ("Select an option: ");
+        c.println ("1. Keyboard Input");
+        c.println ("2. File Input");
+        c.println ("3. Mostly Randomized");
+        c.print ("Enter: ");
+        choice = c.readInt ();
+
+        while (choice != 1 && choice != 2 && choice != 3)
+        {
+            c.clear ();
+            c.println ("INVALID INPUT");
+            c.println ();
+            c.println ("Select an option: ");
+            c.println ("1. Keyboard Input");
+            c.println ("2. File Input");
+            c.println ("3. Mostly Randomized");
+            c.print ("Enter: ");
+            choice = c.readInt ();
+        }
+
+        c.clear ();
+
+        if (choice == 1)
+        {
+            // Sun Characteristics
+            c.println ("Sun Characteristics");
+            c.print ("Radius: ");
+            sun.SetRadius (c.readInt ());
+            c.print ("Colour (0 - 15): ");
+            sun.SetColour (setColour (c.readInt ()));
+            c.print ("CenterX: ");
+            sun.SetX (c.readInt ());
+            c.print ("CenterY: ");
+            sun.SetY (c.readInt ());
+
+            c.println ();
+
+            // Planet Characteristics
+            c.print ("Number of planets: ");
+            nPlanets = c.readInt ();
+
+            c.println ();
+
+            c.println ("Planet Characteristics");
+
+            for (int i = 0 ; i < nPlanets ; i++)
+            {
+                c.println ("Planet " + (i + 1));
+                c.print ("Radius: ");
+                r = c.readInt ();
+                c.print ("Colour (0 - 15): ");
+                colour = (setColour (c.readInt ()));
+                c.print ("Distance from sun: ");
+                distance = c.readInt ();
+                c.print ("Period of rotation: ");
+                angleIncPlanet [i] = c.readInt ();
+
+                c.println ();
+
+                c.print ("Number of moons: ");
+                nMoons [i] = c.readInt ();
+
+                c.println ();
+
+                polarPlanet [i] = new Polar (sun.GetX (), sun.GetY (), distance, Math.random () * (2 * Math.PI));
+                planet [i] = new Ball ((int) polarPlanet [i].GetX (), (int) polarPlanet [i].GetY (), r, colour, backgroundC);
+
+                if (nMoons [i] > 0) // if they enter 0 or less than 0
+                {
+                    c.println ("Moon Characteristics");
+                    for (int j = 0 ; j < nMoons [i] ; j++)
+                    {
+                        c.println ("Moon " + (j + 1));
+                        c.print ("Radius: ");
+                        r = c.readInt ();
+                        c.print ("Colour: ");
+                        colour = (setColour (c.readInt ()));
+                        c.print ("Distance from planet: ");
+                        distance = c.readInt ();
+                        c.print ("Period of rotation: ");
+                        angleIncMoon [i] [j] = c.readInt ();
+
+                        c.println ();
+
+                        polarMoon [i] [j] = new Polar (planet [i].GetX (), planet [i].GetY (), distance, Math.random () * (2 * Math.PI));
+                        moon [i] [j] = new Ball ((int) polarMoon [i] [j].GetX (), (int) polarMoon [i] [j].GetX (), r, colour, backgroundC);
+                    }
+                }
+            }
+        }
+
+        else if (choice == 2)
+        {
+            String line;
+
+            c.print ("Enter the file name: ");
+            BufferedReader input = new BufferedReader (new FileReader (c.readLine ()));
+
+            line = input.readLine ();
+            sun.SetRadius (Integer.parseInt (line));
+            line = input.readLine ();
+            sun.SetColour (setColour (Integer.parseInt (line)));
+            line = input.readLine ();
+            sun.SetX (Integer.parseInt (line));
+            line = input.readLine ();
+            sun.SetY (Integer.parseInt (line));
+
+            line = input.readLine ();
+            nPlanets = Integer.parseInt (line);
+
+            for (int i = 0 ; i < nPlanets ; i++)
+            {
+                line = input.readLine ();
+                r = Integer.parseInt (line);
+                line = input.readLine ();
+                colour = (setColour (Integer.parseInt (line)));
+                line = input.readLine ();
+                distance = Integer.parseInt (line);
+                line = input.readLine ();
+                angleIncPlanet [i] = Integer.parseInt (line);
+                line = input.readLine ();
+                nMoons [i] = Integer.parseInt (line);
+
+                polarPlanet [i] = new Polar (sun.GetX (), sun.GetY (), distance, Math.random () * (2 * Math.PI));
+                planet [i] = new Ball ((int) polarPlanet [i].GetX (), (int) polarPlanet [i].GetY (), r, colour, backgroundC);
+
+                if (nMoons [i] > 0) // if they enter 0 or less than 0
+                {
+                    for (int j = 0 ; j < nMoons [i] ; j++)
+                    {
+                        line = input.readLine ();
+                        r = Integer.parseInt (line);
+                        line = input.readLine ();
+                        colour = (setColour (Integer.parseInt (line)));
+                        line = input.readLine ();
+                        distance = Integer.parseInt (line);
+                        line = input.readLine ();
+                        angleIncMoon [i] [j] = Integer.parseInt (line);
+
+                        polarMoon [i] [j] = new Polar (planet [i].GetX (), planet [i].GetY (), distance, Math.random () * (2 * Math.PI));
+                        moon [i] [j] = new Ball ((int) polarMoon [i] [j].GetX (), (int) polarMoon [i] [j].GetX (), r, colour, backgroundC);
+                    }
+                }
+            }
+        }
+
+        else
+        {
+            c.println ("Ship Mode? (Y/N)");
+            key = c.getChar ();
+            if (key == 'Y' || key == 'y')
+            {
+                scaleFactor = 2;
+
+                sunR = (int) (20 * scaleFactor);
+                maxPlanetR = (int) (12 * scaleFactor);
+                maxMoonR = (int) (4 * scaleFactor);
+                planetStartD = (int) (80 * scaleFactor);
+                planetD = (int) (100 * scaleFactor);
+                moonD = (int) (28 * scaleFactor);
+
+                ship.SetX (sun.GetX ());
+                ship.SetY (sun.GetY () - 100);
+                ship.SetRadius ((int) (ship.GetRadius () * scaleFactor));
+
+                shipMode = true;
+            }
+            else
+            {
+                shipMode = false;
+            }
+
+            c.println ();
+
+            c.print ("How many planets to you want?: ");
+            nPlanets = c.readInt ();
+            c.println ();
+
+            for (int i = 0 ; i < nPlanets ; i++)
+            {
+                distance = (int) (planetStartD + (i * planetD) * scaleFactor);
+                angle = Math.random () * (2 * Math.PI);
+
+                polarPlanet [i] = new Polar (centerX, centerY, distance, angle);
+
+                x = (int) polarPlanet [i].GetX ();
+                y = (int) polarPlanet [i].GetY ();
+                r = (int) ((Math.random () * maxPlanetR - 5) + 10);
+
+                R = (int) (Math.random () * 255);
+                G = (int) (Math.random () * 255);
+                B = (int) (Math.random () * 255);
+                colour = new Color (R, G, B);
+
+                planet [i] = new Ball (x, y, r, colour, backgroundC);
+
+                angleIncPlanet [i] = (int) (((Math.random () * 100) + 100 * (i + 1)) * Math.pow (-1, (int) ((Math.random () * 3) + 1)));
+            }
+
+            for (int i = 1 ; i <= nPlanets ; i++)
+            {
+                c.print ("How many moons for planet " + i + "?: ");
+                nMoons [i - 1] = c.readInt ();
+            }
+
+            int maxMoons = nMoons [0];
+
+            for (int i = 1 ; i < nPlanets ; i++)
+            {
+                if (nMoons [i] > maxMoons)
+                {
+                    maxMoons = nMoons [i];
+                }
+            }
+
+            for (int i = 0 ; i < nPlanets ; i++)
+            {
+                for (int j = 0 ; j < nMoons [i] ; j++)
+                {
+                    centerX = planet [i].GetX ();
+                    centerY = planet [i].GetY ();
+                    distance = (int) (planet [i].GetRadius () + (j + 1) * 15 * scaleFactor);
+                    angle = Math.random () * (2 * Math.PI);
+
+                    polarMoon [i] [j] = new Polar (centerX, centerY, distance, angle);
+
+                    x = (int) polarMoon [i] [j].GetX ();
+                    y = (int) polarMoon [i] [j].GetY ();
+                    r = (int) ((Math.random () * maxMoonR - 5) + 10);
+
+                    moon [i] [j] = new Ball (x, y, r, Color.lightGray, backgroundC);
+
+                    angleIncMoon [i] [j] = (int) (((Math.random () * 100) + 100) * Math.pow (-1, (int) ((Math.random () * 3) + 1)));
+                }
+            }
+        }
+
+        c.setColor (backgroundC);
+        c.fillRect (0, 0, (int) (2000 * scaleFactor), (int) (1000 * scaleFactor));
+
+        for (int i = 0 ; i < nStars ; i++)
+        {
+            starX [i] = (int) (Math.random () * 1200 * scaleFactor);
+            starY [i] = (int) (Math.random () * 1000 * scaleFactor);
+            starL [i] = (int) (Math.random () * 5 * scaleFactor);
+        }
+
+        while (rotating)
+        {
+            drawStars ();
+
+            if (shipMode)
+                ship.Draw (c);
+
+            sun.Draw (c);
+            printSpeed (Color.white);
+
+            ship.SetVertical (0);
+            ship.SetHorizontal (0);
+
+            for (int i = 0 ; i < nPlanets ; i++)
+            {
+                if (shipMode)
+                {
+                    polarPlanet [i].SetCenterX (sun.GetX ());
+                    polarPlanet [i].SetCenterY (sun.GetY ());
+                }
+                polarPlanet [i].SetAngle (polarPlanet [i].GetAngle () + Math.PI / (angleIncPlanet [i] * speedUp));
+                planet [i].SetX ((int) polarPlanet [i].GetX ());
+                planet [i].SetY ((int) polarPlanet [i].GetY ());
+                c.setColor (Color.white);
+                c.drawOval (sun.GetX () - polarPlanet [i].GetDistance (), sun.GetY () - polarPlanet [i].GetDistance (), polarPlanet [i].GetDistance () * 2, polarPlanet [i].GetDistance () * 2);
+                planet [i].Draw (c);
+
+            }
+            for (int i = 0 ; i < nPlanets ; i++)
+            {
+                for (int j = 0 ; j < nMoons [i] ; j++)
+                {
+                    if (shipMode)
+                    {
+                        polarMoon [i] [j].SetCenterX (planet [i].GetX ());
+                        polarMoon [i] [j].SetCenterY (planet [i].GetY ());
+                    }
+                    polarMoon [i] [j].SetAngle (polarMoon [i] [j].GetAngle () + Math.PI / (angleIncMoon [i] [j] * speedUp));
+                    polarMoon [i] [j].SetCenterX (planet [i].GetX ());
+                    polarMoon [i] [j].SetCenterY (planet [i].GetY ());
+                    moon [i] [j].SetX ((int) polarMoon [i] [j].GetX ());
+                    moon [i] [j].SetY ((int) polarMoon [i] [j].GetY ());
+                    c.setColor (Color.lightGray);
+                    c.drawOval (planet [i].GetX () - polarMoon [i] [j].GetDistance (), planet [i].GetY () - polarMoon [i] [j].GetDistance (), polarMoon [i] [j].GetDistance () * 2, polarMoon [i] [j].GetDistance () * 2);
+                    moon [i] [j].Draw (c);
+                }
+            }
+
+            if (c.isCharAvail ())
+            {
+                key = c.getChar ();
+
+                if (shipMode)
+                {
+                    if (key == 'w' || key == 'W')
+                    {
+                        sun.Erase (c);
+                        for (int i = 0 ; i < nPlanets ; i++)
+                        {
+                            c.setColor (backgroundC);
+                            c.drawOval (sun.GetX () - polarPlanet [i].GetDistance (), sun.GetY () - polarPlanet [i].GetDistance (), polarPlanet [i].GetDistance () * 2, polarPlanet [i].GetDistance () * 2);
+                        }
+                        sun.SetY (sun.GetY () + 10);
+                    }
+                    if (key == 's' || key == 'S')
+                    {
+                        sun.Erase (c);
+                        for (int i = 0 ; i < nPlanets ; i++)
+                        {
+                            c.setColor (backgroundC);
+                            c.drawOval (sun.GetX () - polarPlanet [i].GetDistance (), sun.GetY () - polarPlanet [i].GetDistance (), polarPlanet [i].GetDistance () * 2, polarPlanet [i].GetDistance () * 2);
+                        }
+                        sun.SetY (sun.GetY () - 10);
+                    }
+                    if (key == 'a' || key == 'A')
+                    {
+                        sun.Erase (c);
+                        for (int i = 0 ; i < nPlanets ; i++)
+                        {
+                            c.setColor (backgroundC);
+                            c.drawOval (sun.GetX () - polarPlanet [i].GetDistance (), sun.GetY () - polarPlanet [i].GetDistance (), polarPlanet [i].GetDistance () * 2, polarPlanet [i].GetDistance () * 2);
+                        }
+                        sun.SetX (sun.GetX () + 10);
+                    }
+                    if (key == 'd' || key == 'D')
+                    {
+                        sun.Erase (c);
+                        for (int i = 0 ; i < nPlanets ; i++)
+                        {
+                            c.setColor (backgroundC);
+                            c.drawOval (sun.GetX () - polarPlanet [i].GetDistance (), sun.GetY () - polarPlanet [i].GetDistance (), polarPlanet [i].GetDistance () * 2, polarPlanet [i].GetDistance () * 2);
+                        }
+                        sun.SetX (sun.GetX () - 10);
+                    }
+                }
+                if (key == 'e' || key == 'E')
+                {
+                    if (speedUp > 0.2)
+                    {
+                        printSpeed (Color.black);
+                        speedUp -= 0.1;
+                        speedUpShow += 0.1;
+                    }
+                }
+                if (key == 'q' || key == 'Q')
+                {
+                    if (speedUp < 1.9)
+                    {
+                        printSpeed (Color.black);
+                        speedUp += 0.1;
+                        speedUpShow -= 0.1;
+                    }
+                }
+            }
+
+            delay (15);
+
+            for (int i = 0 ; i < nPlanets ; i++)
+            {
+                planet [i].Erase (c);
+                for (int j = 0 ; j < nMoons [i] ; j++)
+                {
+                    c.setColor (backgroundC);
+                    c.drawOval (planet [i].GetX () - polarMoon [i] [j].GetDistance (), planet [i].GetY () - polarMoon [i] [j].GetDistance (), polarMoon [i] [j].GetDistance () * 2, polarMoon [i] [j].GetDistance () * 2);
+                    moon [i] [j].Erase (c);
+                }
+            }
+        }
+    }
+
+
+    public static void delay (int t)
+    {
+        try
+        {
+            Thread.sleep (t);
+        }
+
+
+        catch (InterruptedException error)
+        {
+        }
+    }
+
+
+    public static Color setColour (int color)
+    {
+        if (color == 0)
+        {
+            return Color.black;
+        }
+        else if (color == 1)
+        {
+            return Color.blue;
+        }
+        else if (color == 2)
+        {
+            return Color.green;
+        }
+        else if (color == 3)
+        {
+            return Color.cyan;
+        }
+        else if (color == 4)
+        {
+            return Color.red;
+        }
+        else if (color == 5)
+        {
+            return Color.magenta;
+        }
+        else if (color == 6)
+        {
+            return Color.red;
+        }
+        else if (color == 7)
+        {
+            return Color.white;
+        }
+        else if (color == 8)
+        {
+            return Color.gray;
+        }
+        else if (color == 9)
+        {
+            return Color.blue;
+        }
+        else if (color == 10)
+        {
+            return Color.green;
+        }
+        else if (color == 11)
+        {
+            return Color.cyan;
+        }
+        else if (color == 12)
+        {
+            return Color.red;
+        }
+        else if (color == 13)
+        {
+            return Color.magenta;
+        }
+        else if (color == 14)
+        {
+            return Color.yellow;
+        }
+        else if (color == 15)
+        {
+            return Color.white;
+        }
+        else
+        {
+            return Color.black;
+        }
+    }
+
+
+    public static void drawStars ()
+    {
+        c.setColor (Color.yellow);
+        for (int i = 0 ; i < nStars ; i++)
+        {
+            c.fillStar (starX [i], starY [i], starL [i], starL [i]);
+        }
+        if (iStar >= 2)
+        {
+            blackStar = (int) (Math.random () * nStars);
+            c.setColor (Color.black);
+            c.drawStar (starX [blackStar], starY [blackStar], starL [blackStar], starL [blackStar]);
+            iStar = 0;
+        }
+        iStar++;
+    }
+
+
+    public static void printSpeed (Color color)
+    {
+        c.setTextColor (color);
+        c.setTextBackgroundColor (Color.black);
+        c.setCursor (3, 5);
+        c.print (speedUpShow, 0, 2);
+        c.print ("x");
+    }
+} // PolarTrying class
